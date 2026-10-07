@@ -75,3 +75,32 @@ export interface LoginCredentials {
   password: string;
   expiresInMins?: number;
 }
+
+export interface OrderItem {
+  product: Product;
+  quantity: number;
+  priceAtPurchase: number;
+}
+
+export interface OrderShippingDetails {
+  fullName: string;
+  email: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
+
+export interface Order {
+  id: string;
+  date: string;
+  items: OrderItem[];
+  subtotal: number;
+  totalDiscount: number;
+  finalTotal: number;
+  status: "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  paymentMethod: "credit-card" | "paypal" | "cod";
+  shippingAddress: OrderShippingDetails;
+}
+

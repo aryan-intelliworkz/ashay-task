@@ -1,10 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Product } from "@/types";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
+import { useCompare } from "@/context/CompareContext";
+import { useRecentlyViewed } from "@/context/RecentlyViewedContext";
 import ConceptCard from "@/components/learning/ConceptCard";
+import ShareModal from "@/components/products/ShareModal";
+import RecentlyViewedSection from "@/components/products/RecentlyViewedSection";
+import QuickViewModal from "@/components/products/QuickViewModal";
 import {
   Star,
   ShoppingCart,
@@ -17,18 +23,33 @@ import {
   ArrowLeft,
   Share2,
   Heart,
-  MessageSquareQuote,
-  Layers,
+  Scale,
 } from "lucide-react";
 
 export default function ProductDetailView({ product }: { product: Product }) {
   const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const { isInCompare, toggleCompare } = useCompare();
+  const { addRecentlyViewed } = useRecentlyViewed();
+
   const [selectedImage, setSelectedImage] = useState<string>(
     product.images?.[0] || product.thumbnail
   );
   const [quantity, setQuantity] = useState<number>(1);
   const [isAdded, setIsAdded] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"desc" | "reviews" | "specs">("desc");
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+
+  // Automatically save to Recently Viewed when opened
+  useEffect(() => {
+    if (product && product.id) {
+      addRecentlyViewed(product);
+    }
+  }, [product]);
+
+  const isFavorited = isInWishlist(product.id);
+  const isCompared = isInCompare(product.id);
 
   const originalPrice = (
     product.price /
@@ -44,8 +65,8 @@ export default function ProductDetailView({ product }: { product: Product }) {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Breadcrumb Navigation */}
-        <div className="flex items-center justify-between">
+        {/* Breadcrumb Navigation & Action Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <nav className="flex items-center gap-2 text-xs text-slate-500">
             <Link href="/" className="hover:text-indigo-600 transition-colors">
               Home
@@ -67,13 +88,50 @@ export default function ProductDetailView({ product }: { product: Product }) {
             </span>
           </nav>
 
-          <Link
-            href="/products"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to catalog</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            {/* Wishlist Button */}
+            <button
+              onClick={() => toggleWishlist(product)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                isFavorited
+                  ? "bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-950/40 dark:border-rose-900"
+                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-rose-600"
+              }`}
+            >
+              <Heart className={`w-3.5 h-3.5 ${isFavorited ? "fill-rose-500 text-rose-500" : ""}`} />
+              <span>{isFavorited ? "In Wishlist" : "Wishlist"}</span>
+            </button>
+
+            {/* Compare Button */}
+            <button
+              onClick={() => toggleCompare(product)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                isCompared
+                  ? "bg-indigo-50 border-indigo-200 text-indigo-600 dark:bg-indigo-950/40 dark:border-indigo-900"
+                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-600"
+              }`}
+            >
+              <Scale className="w-3.5 h-3.5" />
+              <span>{isCompared ? "In Compare" : "Compare"}</span>
+            </button>
+
+            {/* Share Button */}
+            <button
+              onClick={() => setShareModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 transition-colors shadow-sm"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Share</span>
+            </button>
+
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 transition-colors shadow-sm"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Catalog</span>
+            </Link>
+          </div>
         </div>
 
         {/* Dynamic Route Next.js Concept Explanation */}
@@ -369,6 +427,24 @@ export default async function ProductPage({
             </div>
           )}
         </div>
+
+        {/* Recently Viewed Products Section */}
+        <RecentlyViewedSection onQuickView={(p) => setQuickViewProduct(p)} />
+
+        {/* Share Modal */}
+        <ShareModal
+          products={[product]}
+          isOpen={shareModalOpen}
+          onClose={() => setShareModalOpen(false)}
+          customTitle={product.title}
+        />
+
+        {/* Quick View Modal */}
+        <QuickViewModal
+          product={quickViewProduct}
+          isOpen={!!quickViewProduct}
+          onClose={() => setQuickViewProduct(null)}
+        />
       </div>
     </div>
   );

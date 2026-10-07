@@ -3,9 +3,14 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
+import { CompareProvider } from "@/context/CompareContext";
+import { RecentlyViewedProvider } from "@/context/RecentlyViewedContext";
+import { OrdersProvider } from "@/context/OrdersContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Toast from "@/components/ui/Toast";
+import CompareFloatingBar from "@/components/products/CompareFloatingBar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -15,7 +20,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "NextCart • Next.js E-Commerce & Learning Hub",
   description:
-    "A beginner-friendly Next.js App Router e-commerce application demonstrating Authentication flow, Client-Side Rendering, API calls with DummyJSON, and Dashboard.",
+    "A modern Next.js App Router e-commerce application with Authentication, Wishlist, Compare, Recently Viewed, Shareable Lists, and Order History.",
 };
 
 export default function RootLayout({
@@ -30,10 +35,19 @@ export default function RootLayout({
       >
         <AuthProvider>
           <CartProvider>
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <Toast />
+            <WishlistProvider>
+              <CompareProvider>
+                <RecentlyViewedProvider>
+                  <OrdersProvider>
+                    <Navbar />
+                    <main className="flex-1">{children}</main>
+                    <CompareFloatingBar />
+                    <Footer />
+                    <Toast />
+                  </OrdersProvider>
+                </RecentlyViewedProvider>
+              </CompareProvider>
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </body>

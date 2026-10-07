@@ -5,13 +5,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
+import { useCompare } from "@/context/CompareContext";
 import {
   ShoppingBag,
   ShoppingCart,
+  Heart,
+  Scale,
   User as UserIcon,
   LogOut,
   LayoutDashboard,
   BookOpen,
+  PackageCheck,
   Menu,
   X,
   Sparkles,
@@ -21,14 +26,19 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const { totalItems } = useCart();
+  const { wishlistCount } = useWishlist();
+  const { compareCount } = useCompare();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Products", href: "/products" },
+    { name: "Wishlist", href: "/wishlist" },
+    { name: "Compare", href: "/compare" },
+    { name: "Orders", href: "/orders" },
     { name: "Dashboard", href: "/dashboard" },
-    { name: "Next.js Guide", href: "/learn" },
   ];
 
   const isActive = (path: string) => {
@@ -62,16 +72,16 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="hidden lg:flex items-center space-x-1">
             {navLinks.map((link) => {
               const active = isActive(link.href);
               return (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
                     active
-                      ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 font-semibold"
+                      ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800"
                   }`}
                 >
@@ -81,15 +91,36 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Right Action Icons */}
-          <div className="flex items-center gap-3">
-            {/* Learning Hub Pill */}
+          {/* Right Action Icons (Wishlist, Compare, Cart, Auth) */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            {/* Wishlist Button with Navbar Count */}
             <Link
-              href="/learn"
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800 transition-colors"
+              href="/wishlist"
+              className="relative p-2 text-slate-700 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              aria-label="View Wishlist"
+              title="Wishlist"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-              <span>Next.js Flow Guide</span>
+              <Heart className={`w-5 h-5 ${wishlistCount > 0 ? "text-rose-500 fill-rose-500" : ""}`} />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-md animate-scale-in">
+                  {wishlistCount > 9 ? "9+" : wishlistCount}
+                </span>
+              )}
+            </Link>
+
+            {/* Compare Button with Navbar Count */}
+            <Link
+              href="/compare"
+              className="relative p-2 text-slate-700 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              aria-label="Compare Products"
+              title="Compare"
+            >
+              <Scale className={`w-5 h-5 ${compareCount > 0 ? "text-indigo-600" : ""}`} />
+              {compareCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-md animate-scale-in">
+                  {compareCount}
+                </span>
+              )}
             </Link>
 
             {/* Cart Button */}
@@ -97,6 +128,7 @@ export default function Navbar() {
               href="/cart"
               className="relative p-2 text-slate-700 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               aria-label="View Cart"
+              title="Cart"
             >
               <ShoppingCart className="w-5 h-5" />
               {totalItems > 0 && (
@@ -124,7 +156,7 @@ export default function Navbar() {
                       {user.firstName ? user.firstName[0] : "U"}
                     </div>
                   )}
-                  <span className="hidden sm:inline text-xs font-medium text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
+                  <span className="hidden sm:inline text-xs font-medium text-slate-700 dark:text-slate-200 max-w-[90px] truncate">
                     {user.firstName}
                   </span>
                 </button>
@@ -148,6 +180,24 @@ export default function Navbar() {
                     >
                       <LayoutDashboard className="w-4 h-4 text-indigo-500" />
                       User Dashboard
+                    </Link>
+
+                    <Link
+                      href="/orders"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    >
+                      <PackageCheck className="w-4 h-4 text-emerald-500" />
+                      My Orders
+                    </Link>
+
+                    <Link
+                      href="/wishlist"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    >
+                      <Heart className="w-4 h-4 text-rose-500" />
+                      Saved Wishlist ({wishlistCount})
                     </Link>
 
                     <Link
@@ -177,7 +227,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition-all hover:shadow hover:shadow-indigo-500/25"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition-all hover:shadow hover:shadow-indigo-500/25"
               >
                 <UserIcon className="w-3.5 h-3.5" />
                 <span>Log In</span>
@@ -187,7 +237,7 @@ export default function Navbar() {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="lg:hidden p-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -198,15 +248,15 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pt-2 pb-6 space-y-2">
+        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pt-2 pb-6 space-y-2">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
               onClick={() => setMobileMenuOpen(false)}
-              className={`block px-3 py-2 rounded-lg text-base font-medium ${
+              className={`block px-3 py-2 rounded-lg text-sm font-medium ${
                 isActive(link.href)
-                  ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400"
+                  ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400 font-bold"
                   : "text-slate-700 dark:text-slate-200"
               }`}
             >

@@ -2,10 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Product } from "@/types";
 import { useCart } from "@/context/CartContext";
-import { Star, ShoppingCart, Eye, Check } from "lucide-react";
+import { useWishlist } from "@/context/WishlistContext";
+import { useCompare } from "@/context/CompareContext";
+import { useRecentlyViewed } from "@/context/RecentlyViewedContext";
+import { Star, ShoppingCart, Eye, Check, Heart, Scale } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
@@ -14,7 +16,13 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, onQuickView }: ProductCardProps) {
   const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const { isInCompare, toggleCompare } = useCompare();
+  const { addRecentlyViewed } = useRecentlyViewed();
   const [isAdded, setIsAdded] = useState(false);
+
+  const isFavorited = isInWishlist(product.id);
+  const isCompared = isInCompare(product.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -22,6 +30,31 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
     addToCart(product, 1);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1500);
+  };
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product);
+  };
+
+  const handleCompareToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleCompare(product);
+  };
+
+  const handleProductClick = () => {
+    addRecentlyViewed(product);
+  };
+
+  const handleQuickViewClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addRecentlyViewed(product);
+    if (onQuickView) {
+      onQuickView(product);
+    }
   };
 
   // Calculate discounted original price estimate
@@ -33,36 +66,68 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
   return (
     <div className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden hover:-translate-y-1">
       {/* Discount Badge & Category Tag */}
-      <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
+      <div className="absolute top-3 left-3 z-10 flex flex-col gap-1 pointer-events-none">
         {product.discountPercentage > 0 && (
           <span className="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
             {Math.round(product.discountPercentage)}% OFF
           </span>
         )}
-        <span className="bg-slate-900/70 backdrop-blur-md text-white text-[9px] font-medium px-2 py-0.5 rounded-full uppercase tracking-wider">
+        <span className="bg-slate-900/75 backdrop-blur-md text-white text-[9px] font-medium px-2 py-0.5 rounded-full uppercase tracking-wider">
           {product.category}
         </span>
       </div>
 
-      {/* Quick View Button on Card Hover */}
-      {onQuickView && (
+      {/* Top-Right Quick Action Icons (Wishlist, Compare, Quick View) */}
+      <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
+        {/* Wishlist Heart Button */}
         <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onQuickView(product);
-          }}
-          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md hover:bg-white hover:text-indigo-600"
-          title="Quick View"
-          aria-label="Quick View"
+          onClick={handleWishlistToggle}
+          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 shadow-md ${
+            isFavorited
+              ? "bg-rose-50 text-rose-500 border border-rose-200 dark:bg-rose-950/80 dark:border-rose-900 scale-105"
+              : "bg-white/90 dark:bg-slate-800/90 text-slate-500 hover:text-rose-500 hover:bg-white dark:hover:bg-slate-800"
+          }`}
+          title={isFavorited ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={isFavorited ? "Remove from wishlist" : "Add to wishlist"}
         >
-          <Eye className="w-4 h-4" />
+          <Heart
+            className={`w-4 h-4 transition-transform active:scale-125 ${
+              isFavorited ? "fill-rose-500 text-rose-500" : ""
+            }`}
+          />
         </button>
-      )}
+
+        {/* Compare Button */}
+        <button
+          onClick={handleCompareToggle}
+          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 shadow-md ${
+            isCompared
+              ? "bg-indigo-600 text-white shadow-indigo-600/30 scale-105"
+              : "bg-white/90 dark:bg-slate-800/90 text-slate-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-slate-800"
+          }`}
+          title={isCompared ? "Remove from comparison" : "Add to comparison"}
+          aria-label={isCompared ? "Remove from comparison" : "Add to comparison"}
+        >
+          <Scale className="w-4 h-4" />
+        </button>
+
+        {/* Quick View Button */}
+        {onQuickView && (
+          <button
+            onClick={handleQuickViewClick}
+            className="w-8 h-8 rounded-full bg-white/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md hover:bg-white hover:text-indigo-600"
+            title="Quick View"
+            aria-label="Quick View"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+        )}
+      </div>
 
       {/* Product Image Link */}
       <Link
         href={`/products/${product.id}`}
+        onClick={handleProductClick}
         className="relative w-full pt-[80%] bg-slate-100 dark:bg-slate-800 overflow-hidden cursor-pointer"
       >
         <img
@@ -88,7 +153,7 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
           </div>
 
           {/* Title */}
-          <Link href={`/products/${product.id}`}>
+          <Link href={`/products/${product.id}`} onClick={handleProductClick}>
             <h3 className="font-semibold text-slate-900 dark:text-white text-sm line-clamp-2 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
               {product.title}
             </h3>

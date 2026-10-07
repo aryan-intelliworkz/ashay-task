@@ -124,6 +124,9 @@ export async function loginUserApi(credentials: LoginCredentials): Promise<User>
     const data = await res.json();
 
     if (!res.ok) {
+      if (data.message === "Invalid credentials" || res.status === 400) {
+        throw new Error("Invalid username or password. Please use a valid DummyJSON account (e.g., username: 'emilys', password: 'emilyspass') or click any 1-click demo account below.");
+      }
       throw new Error(data.message || "Invalid username or password");
     }
 

@@ -3,9 +3,11 @@
 import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Product, Category } from "@/types";
-import { getProducts, getCategories } from "@/lib/api";
+import { getProducts, getCategories, getProductById } from "@/lib/api";
 import ProductCard from "@/components/products/ProductCard";
 import QuickViewModal from "@/components/products/QuickViewModal";
+import ShareModal from "@/components/products/ShareModal";
+import RecentlyViewedSection from "@/components/products/RecentlyViewedSection";
 import ConceptCard from "@/components/learning/ConceptCard";
 import {
   Search,
@@ -14,7 +16,8 @@ import {
   RotateCcw,
   ChevronLeft,
   ChevronRight,
-  Loader2,
+  Share2,
+  Sparkles,
 } from "lucide-react";
 
 function ProductsContent() {
@@ -24,6 +27,7 @@ function ProductsContent() {
   // URL query params or defaults
   const initialCategory = searchParams.get("category") || "all";
   const initialSearch = searchParams.get("q") || "";
+  const sharedIdsParam = searchParams.get("shared") || "";
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -40,6 +44,7 @@ function ProductsContent() {
   // UI state
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   // Fetch Categories on mount
   useEffect(() => {
@@ -58,6 +63,26 @@ function ProductsContent() {
   const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
+
+      // If shared IDs are passed in query param, restore them directly
+      if (sharedIdsParam) {
+        const ids = sharedIdsParam.split(",").map((id) => id.trim()).filter(Boolean);
+        const fetched = await Promise.all(
+          ids.map(async (id) => {
+            try {
+              return await getProductById(id);
+            } catch {
+              return null;
+            }
+          })
+        );
+        const valid = fetched.filter((p): p is Product => p !== null);
+        setProducts(valid);
+        setTotalProducts(valid.length);
+        setLoading(false);
+        return;
+      }
+
       const skip = (page - 1) * limit;
 
       const res = await getProducts({
@@ -76,7 +101,7 @@ function ProductsContent() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, searchQuery, sortBy, order, page, limit]);
+  }, [selectedCategory, searchQuery, sortBy, order, page, limit, sharedIdsParam]);
 
   useEffect(() => {
     loadProducts();
@@ -87,6 +112,7 @@ function ProductsContent() {
     setSelectedCategory(slug);
     setPage(1);
     const params = new URLSearchParams(searchParams.toString());
+    params.delete("shared");
     if (slug === "all") {
       params.delete("category");
     } else {
@@ -131,20 +157,49 @@ function ProductsContent() {
           </p>
         </div>
 
-        {/* Quick Stats Pill */}
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
-          <span className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+        {/* Action buttons (Share current list, Page Stats, Reset) */}
+        <div className="flex items-center gap-2 flex-wrap text-xs font-semibold text-slate-600 dark:text-slate-300">
+          {products.length > 0 && (
+            <button
+              onClick={() => setShareModalOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-sm transition-colors"
+            >
+              <Share2 className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Share This List</span>
+            </button>
+          )}
+
+          <span className="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             Page {page} of {totalPages}
           </span>
+
           <button
             onClick={resetFilters}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-rose-600 transition-colors"
+            className="flex items-center gap-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-rose-600 transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset</span>
           </button>
         </div>
       </div>
+
+      {/* Shared List Banner if restored via URL */}
+      {sharedIdsParam && (
+        <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs text-indigo-900 dark:text-indigo-200 font-medium">
+            <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+            <span>
+              Showing <strong>{products.length}</strong> products restored from shared link.
+            </span>
+          </div>
+          <button
+            onClick={resetFilters}
+            className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline shrink-0"
+          >
+            Show All Catalog Products →
+          </button>
+        </div>
+      )}
 
       {/* Educational Explainer Banner for Beginners */}
       <ConceptCard
@@ -236,7 +291,7 @@ export default function ProductList() {
         <button
           onClick={() => handleCategoryChange("all")}
           className={`px-4 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all ${
-            selectedCategory === "all"
+            selectedCategory === "all" && !sharedIdsParam
               ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
               : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
@@ -302,7 +357,7 @@ export default function ProductList() {
       )}
 
       {/* Pagination Controls */}
-      {totalPages > 1 && (
+      {!sharedIdsParam && totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 pt-6">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -328,11 +383,22 @@ export default function ProductList() {
         </div>
       )}
 
+      {/* Recently Viewed (Last 5 opened products) Section on Catalog page */}
+      <RecentlyViewedSection onQuickView={(p) => setSelectedProduct(p)} />
+
       {/* Quick View Modal */}
       <QuickViewModal
         product={selectedProduct}
         isOpen={!!selectedProduct}
         onClose={() => setSelectedProduct(null)}
+      />
+
+      {/* Share Modal */}
+      <ShareModal
+        products={products.slice(0, 12)}
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        customTitle={`Curated ${selectedCategory !== "all" ? selectedCategory : "Featured"} Products`}
       />
     </div>
   );

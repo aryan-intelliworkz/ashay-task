@@ -6,18 +6,20 @@ import { Product } from "@/types";
 import { getProducts } from "@/lib/api";
 import ProductCard from "@/components/products/ProductCard";
 import QuickViewModal from "@/components/products/QuickViewModal";
+import RecentlyViewedSection from "@/components/products/RecentlyViewedSection";
 import ConceptCard from "@/components/learning/ConceptCard";
 import {
   Sparkles,
   ArrowRight,
-  ShieldCheck,
   Zap,
   ShoppingBag,
   Layers,
   Database,
   KeyRound,
-  RefreshCw,
   Cpu,
+  Heart,
+  Scale,
+  PackageCheck,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -56,7 +58,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 space-y-14">
       {/* 1. Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-indigo-900 via-indigo-950 to-slate-950 text-white pt-16 pb-24 px-4 sm:px-6 lg:px-8">
         {/* Ambient Glows */}
@@ -68,7 +70,7 @@ export default function HomePage() {
             {/* Pill */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-xs font-semibold backdrop-blur-md">
               <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />
-              <span>Next.js App Router • DummyJSON Mock API • Tailwind CSS</span>
+              <span>Wishlist • Product Compare • Recently Viewed • Shareable Lists</span>
             </div>
 
             {/* Main Headline */}
@@ -81,9 +83,8 @@ export default function HomePage() {
 
             {/* Subtext */}
             <p className="text-sm sm:text-base text-indigo-200/80 max-w-2xl leading-relaxed">
-              Learn how <strong>Login Flows</strong>, <strong>Client-Side Rendering (CSR)</strong>,
-              <strong>REST API calls</strong>, and <strong>Protected Dashboards</strong> work in Next.js
-              with real-world code and interactive components.
+              Explore <strong>Recently Viewed Products</strong>, save items to your <strong>Wishlist</strong>,
+              compare specs across products, share custom lists, and re-order with 1-click.
             </p>
 
             {/* Call to Actions */}
@@ -93,74 +94,86 @@ export default function HomePage() {
                 className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold shadow-lg shadow-indigo-600/30 transition-all hover:scale-105 flex items-center gap-2"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span>Explore Products</span>
+                <span>Explore Catalog</span>
               </Link>
 
               <Link
-                href="/login"
+                href="/wishlist"
                 className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-bold border border-white/20 backdrop-blur-md transition-all hover:scale-105 flex items-center gap-2"
               >
-                <KeyRound className="w-4 h-4 text-amber-400" />
-                <span>Test Login Flow</span>
+                <Heart className="w-4 h-4 text-rose-400" />
+                <span>My Wishlist</span>
               </Link>
 
               <Link
-                href="/learn"
-                className="px-5 py-3 rounded-xl text-indigo-200 hover:text-white text-sm font-semibold transition-colors flex items-center gap-1.5"
+                href="/compare"
+                className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-bold border border-white/20 backdrop-blur-md transition-all hover:scale-105 flex items-center gap-2"
               >
-                <span>Read Architecture Guide</span>
-                <ArrowRight className="w-4 h-4" />
+                <Scale className="w-4 h-4 text-amber-400" />
+                <span>Compare Products</span>
               </Link>
             </div>
 
             {/* Architecture Highlights pills */}
             <div className="pt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-4xl text-left">
-              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+              <Link
+                href="/dashboard"
+                className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors"
+              >
                 <div className="flex items-center gap-2 text-indigo-300 text-xs font-semibold mb-1">
                   <KeyRound className="w-4 h-4 text-amber-400" />
-                  <span>1. Auth Flow</span>
+                  <span>1. Dashboard</span>
                 </div>
                 <p className="text-[11px] text-slate-300">
-                  DummyJSON JWT login, token stored in Cookies & LocalStorage
+                  User profile, token inspection, and recent activity
                 </p>
-              </div>
+              </Link>
 
-              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+              <Link
+                href="/wishlist"
+                className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors"
+              >
                 <div className="flex items-center gap-2 text-indigo-300 text-xs font-semibold mb-1">
-                  <Cpu className="w-4 h-4 text-sky-400" />
-                  <span>2. Client Rendering</span>
+                  <Heart className="w-4 h-4 text-rose-400" />
+                  <span>2. Wishlist Hub</span>
                 </div>
                 <p className="text-[11px] text-slate-300">
-                  `"use client"` components with hooks, state, and live filters
+                  Save favorites with navbar badge and instant move-to-cart
                 </p>
-              </div>
+              </Link>
 
-              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+              <Link
+                href="/compare"
+                className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors"
+              >
                 <div className="flex items-center gap-2 text-indigo-300 text-xs font-semibold mb-1">
-                  <Database className="w-4 h-4 text-emerald-400" />
-                  <span>3. Mock API Calls</span>
+                  <Scale className="w-4 h-4 text-emerald-400" />
+                  <span>3. Product Compare</span>
                 </div>
                 <p className="text-[11px] text-slate-300">
-                  Real HTTP REST requests to `https://dummyjson.com`
+                  Side-by-side spec comparison table for up to 3 products
                 </p>
-              </div>
+              </Link>
 
-              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+              <Link
+                href="/orders"
+                className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors"
+              >
                 <div className="flex items-center gap-2 text-indigo-300 text-xs font-semibold mb-1">
-                  <Layers className="w-4 h-4 text-fuchsia-400" />
-                  <span>4. Dynamic Routing</span>
+                  <PackageCheck className="w-4 h-4 text-fuchsia-400" />
+                  <span>4. 1-Click Re-order</span>
                 </div>
                 <p className="text-[11px] text-slate-300">
-                  Pages mapped to `/products/[id]` with slug parameter resolution
+                  Save orders and re-populate shopping cart in one click
                 </p>
-              </div>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* 2. Featured Categories Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20">
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 dark:border-slate-800">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -199,8 +212,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Featured Products Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-14">
+      {/* 3. Recently Viewed Section on Homepage */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <RecentlyViewedSection
+          title="Pick Up Where You Left Off (Recently Viewed)"
+          subtitle="Your last 5 opened products are saved automatically"
+          onQuickView={(p) => setSelectedProduct(p)}
+        />
+      </section>
+
+      {/* 4. Featured Products Grid */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-2">
           <div>
             <div className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">
@@ -250,45 +272,8 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* 4. Interactive Learning Explainer Box on Landing Page */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
-        <div className="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
-          <div className="max-w-3xl relative z-10 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-bold">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Next.js Beginner Guide</span>
-            </div>
-            <h3 className="text-2xl sm:text-3xl font-bold">
-              How does this page fetch and render data?
-            </h3>
-            <p className="text-sm text-indigo-200/90 leading-relaxed">
-              In Next.js, pages can be rendered on the <strong>Server (SSR/SSG)</strong> or on the{" "}
-              <strong>Client (CSR)</strong>. This page uses a Client Component (marked with{" "}
-              <code className="bg-slate-800 px-1.5 py-0.5 rounded font-mono text-amber-300">"use client"</code>)
-              which fetches data in the browser via React’s <code className="bg-slate-800 px-1.5 py-0.5 rounded font-mono text-amber-300">useEffect</code>.
-            </p>
-
-            <div className="pt-2 flex flex-wrap gap-3">
-              <Link
-                href="/learn"
-                className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
-              >
-                <span>Open Next.js Interactive Guide</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-              <Link
-                href="/products"
-                className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/20 transition-colors"
-              >
-                See Product Filter Flow
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* 5. Trending Deals Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">

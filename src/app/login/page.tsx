@@ -25,8 +25,8 @@ function LoginFormContent() {
 
   const { login, isAuthenticated, isLoading } = useAuth();
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("emilys");
+  const [password, setPassword] = useState("emilyspass");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -45,10 +45,24 @@ function LoginFormContent() {
     { username: "sophiah", password: "sophiahpass", name: "Sophia Martinez", role: "Customer" },
   ];
 
-  const handleFillDemo = (user: string, pass: string) => {
+  const handleFillDemo = async (user: string, pass: string, autoSubmit = false) => {
     setUsername(user);
     setPassword(pass);
     setErrorMessage(null);
+
+    if (autoSubmit) {
+      try {
+        setIsSubmitting(true);
+        await login({ username: user, password: pass });
+        router.push(redirectUrl);
+      } catch (err: any) {
+        setErrorMessage(
+          err.message || "Failed to log in. Please verify your credentials."
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -170,11 +184,9 @@ function LoginFormContent() {
 
         <div className="space-y-2.5">
           {demoAccounts.map((acc) => (
-            <button
+            <div
               key={acc.username}
-              type="button"
-              onClick={() => handleFillDemo(acc.username, acc.password)}
-              className={`w-full text-left p-3 rounded-2xl border transition-all ${
+              className={`p-3 rounded-2xl border transition-all ${
                 username === acc.username
                   ? "border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/40"
                   : "border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50 dark:bg-slate-950"
@@ -192,7 +204,24 @@ function LoginFormContent() {
                 <span>user: {acc.username}</span>
                 <span>pass: {acc.password}</span>
               </div>
-            </button>
+              <div className="mt-2 flex gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => handleFillDemo(acc.username, acc.password, false)}
+                  className="flex-1 py-1 px-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100"
+                >
+                  Fill Form
+                </button>
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => handleFillDemo(acc.username, acc.password, true)}
+                  className="flex-1 py-1 px-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold shadow-sm"
+                >
+                  Instant Login →
+                </button>
+              </div>
+            </div>
           ))}
         </div>
 
