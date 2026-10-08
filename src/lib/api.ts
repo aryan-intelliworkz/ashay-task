@@ -117,7 +117,7 @@ export async function loginUserApi(credentials: LoginCredentials): Promise<User>
       body: JSON.stringify({
         username: credentials.username,
         password: credentials.password,
-        expiresInMins: credentials.expiresInMins || 60,
+        expiresInMins: credentials.expiresInMins || 1440, // 24 hours
       }),
     });
 
@@ -148,7 +148,7 @@ export async function loginUserApi(credentials: LoginCredentials): Promise<User>
 }
 
 // 5. Fetch full User Profile with Auth Token
-export async function getCurrentUserProfile(token: string): Promise<User> {
+export async function getCurrentUserProfile(token: string): Promise<User | null> {
   try {
     const res = await fetch(`${BASE_URL}/auth/me`, {
       method: "GET",
@@ -158,13 +158,14 @@ export async function getCurrentUserProfile(token: string): Promise<User> {
     });
 
     if (!res.ok) {
-      throw new Error("Session expired or invalid token");
+      // Gracefully return null on expired or mock session token
+      return null;
     }
 
     return await res.json();
   } catch (error) {
-    console.error("Error fetching user profile:", error);
-    throw error;
+    console.warn("Could not fetch latest user profile from API, using active session:", error);
+    return null;
   }
 }
 

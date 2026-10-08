@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { Product } from "@/types";
 
 interface RecentlyViewedContextType {
@@ -8,57 +8,89 @@ interface RecentlyViewedContextType {
   addRecentlyViewed: (product: Product) => void;
   clearRecentlyViewed: () => void;
   removeRecentlyViewed: (productId: number) => void;
+  isLoaded: boolean;
 }
 
 const RecentlyViewedContext = createContext<RecentlyViewedContextType | undefined>(undefined);
 
 const MAX_RECENT_ITEMS = 5;
+const STORAGE_KEY = "recently_viewed_products";
 
 export function RecentlyViewedProvider({ children }: { children: React.ReactNode }) {
   const [recentlyViewed, setRecentlyViewed] = useState<Product[]>([]);
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
+  // Load from localStorage on client mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("recently_viewed_products");
+      const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        setRecentlyViewed(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setRecentlyViewed(parsed.slice(0, MAX_RECENT_ITEMS));
+        }
       }
     } catch (e) {
       console.error("Failed to load recently viewed products from storage", e);
+    } finally {
+      setIsLoaded(true);
     }
   }, []);
 
-  const saveToStorage = (items: Product[]) => {
-    try {
-      localStorage.setItem("recently_viewed_products", JSON.stringify(items));
-    } catch (e) {
-      console.error("Failed to save recently viewed products", e);
-    }
-  };
-
-  const addRecentlyViewed = (product: Product) => {
+  const addRecentlyViewed = useCallback((product: Product) => {
     if (!product || !product.id) return;
+
     setRecentlyViewed((prev) => {
-      // Remove if already exists so we can prepend as most recent
-      const filtered = prev.filter((item) => item.id !== product.id);
+      // Get current list, either from state or read localStorage if needed
+      let current = prev;
+      if (prev.length === 0 && typeof window !== "undefined") {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              current = parsed;
+            }
+          }
+        } catch {
+          // fallback to prev
+        }
+      }
+
+      // Filter out existing occurrence of this product to push it to top
+      const filtered = current.filter((item) => item.id !== product.id);
       const updated = [product, ...filtered].slice(0, MAX_RECENT_ITEMS);
-      saveToStorage(updated);
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {
+        console.error("Failed to save recently viewed products", e);
+      }
+
       return updated;
     });
-  };
+  }, []);
 
-  const removeRecentlyViewed = (productId: number) => {
+  const removeRecentlyViewed = useCallback((productId: number) => {
     setRecentlyViewed((prev) => {
       const updated = prev.filter((item) => item.id !== productId);
-      saveToStorage(updated);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {
+        console.error("Failed to save recently viewed products", e);
+      }
       return updated;
     });
-  };
+  }, []);
 
-  const clearRecentlyViewed = () => {
+  const clearRecentlyViewed = useCallback(() => {
     setRecentlyViewed([]);
-    localStorage.removeItem("recently_viewed_products");
-  };
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.error("Failed to clear recently viewed products", e);
+    }
+  }, []);
 
   return (
     <RecentlyViewedContext.Provider
@@ -67,6 +99,7 @@ export function RecentlyViewedProvider({ children }: { children: React.ReactNode
         addRecentlyViewed,
         clearRecentlyViewed,
         removeRecentlyViewed,
+        isLoaded,
       }}
     >
       {children}
@@ -81,3 +114,4 @@ export function useRecentlyViewed() {
   }
   return context;
 }
+

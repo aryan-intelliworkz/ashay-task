@@ -7,7 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCompare } from "@/context/CompareContext";
 import { useRecentlyViewed } from "@/context/RecentlyViewedContext";
-import { Star, ShoppingCart, Eye, Check, Heart, Scale } from "lucide-react";
+import { Star, ShoppingCart, Eye, Check, Heart, Scale, Plus, Minus } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
@@ -15,7 +15,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onQuickView }: ProductCardProps) {
-  const { addToCart } = useCart();
+  const { items, addToCart, updateQuantity } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { isInCompare, toggleCompare } = useCompare();
   const { addRecentlyViewed } = useRecentlyViewed();
@@ -24,12 +24,30 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
   const isFavorited = isInWishlist(product.id);
   const isCompared = isInCompare(product.id);
 
+  // Check if item is already in cart
+  const cartItem = items.find((item) => item.product.id === product.id);
+  const cartQuantity = cartItem ? cartItem.quantity : 0;
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addToCart(product, 1);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1500);
+  };
+
+  const handleIncrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (cartQuantity < product.stock) {
+      updateQuantity(product.id, cartQuantity + 1);
+    }
+  };
+
+  const handleDecrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    updateQuantity(product.id, cartQuantity - 1);
   };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
@@ -165,8 +183,8 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
           </p>
         </div>
 
-        {/* Price & Add to Cart Button */}
-        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        {/* Price & Quantity Controls / Add to Cart Button */}
+        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
           <div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-lg font-bold text-slate-900 dark:text-white">
@@ -183,30 +201,57 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
             </span>
           </div>
 
-          <button
-            onClick={handleAddToCart}
-            disabled={product.stock <= 0}
-            className={`p-2.5 rounded-xl font-medium text-xs flex items-center gap-1.5 transition-all duration-200 ${
-              isAdded
-                ? "bg-emerald-600 text-white"
-                : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-500/20 active:scale-95"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
-            aria-label="Add to cart"
-          >
-            {isAdded ? (
-              <>
-                <Check className="w-4 h-4" />
-                <span className="hidden sm:inline">Added</span>
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-4 h-4" />
-                <span className="hidden sm:inline">Add</span>
-              </>
-            )}
-          </button>
+          {/* Increment / Decrement Quantity Buttons or Add Button */}
+          {cartQuantity > 0 ? (
+            <div className="flex items-center bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 rounded-xl overflow-hidden shadow-sm">
+              <button
+                onClick={handleDecrement}
+                className="p-2 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-900 transition-colors"
+                title="Decrement quantity"
+                aria-label="Decrement quantity"
+              >
+                <Minus className="w-3.5 h-3.5" />
+              </button>
+              <span className="px-2 text-xs font-bold text-indigo-700 dark:text-indigo-300 min-w-[20px] text-center">
+                {cartQuantity}
+              </span>
+              <button
+                onClick={handleIncrement}
+                disabled={cartQuantity >= product.stock}
+                className="p-2 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Increment quantity"
+                aria-label="Increment quantity"
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              disabled={product.stock <= 0}
+              className={`p-2.5 rounded-xl font-medium text-xs flex items-center gap-1.5 transition-all duration-200 ${
+                isAdded
+                  ? "bg-emerald-600 text-white"
+                  : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-500/20 active:scale-95"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              aria-label="Add to cart"
+            >
+              {isAdded ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span className="hidden sm:inline">Added</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4" />
+                  <span className="hidden sm:inline">Add</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
 }
+

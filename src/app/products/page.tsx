@@ -384,7 +384,10 @@ export default function ProductList() {
       )}
 
       {/* Recently Viewed (Last 5 opened products) Section on Catalog page */}
-      <RecentlyViewedSection onQuickView={(p) => setSelectedProduct(p)} />
+      <RecentlyViewedSection
+        onQuickView={(p) => setSelectedProduct(p)}
+        showEmptyState={true}
+      />
 
       {/* Quick View Modal */}
       <QuickViewModal

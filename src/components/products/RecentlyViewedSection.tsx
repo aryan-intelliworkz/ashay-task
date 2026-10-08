@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useRecentlyViewed } from "@/context/RecentlyViewedContext";
 import ProductCard from "@/components/products/ProductCard";
-import { History, Trash2, ArrowRight } from "lucide-react";
+import { History, Trash2, ArrowRight, Eye, Sparkles } from "lucide-react";
 import { Product } from "@/types";
 
 interface RecentlyViewedSectionProps {
@@ -12,6 +12,7 @@ interface RecentlyViewedSectionProps {
   title?: string;
   subtitle?: string;
   showClear?: boolean;
+  showEmptyState?: boolean;
 }
 
 export default function RecentlyViewedSection({
@@ -19,11 +20,39 @@ export default function RecentlyViewedSection({
   title = "Recently Viewed Products",
   subtitle = "Last 5 products you explored across the store",
   showClear = true,
+  showEmptyState = false,
 }: RecentlyViewedSectionProps) {
-  const { recentlyViewed, clearRecentlyViewed } = useRecentlyViewed();
+  const { recentlyViewed, clearRecentlyViewed, isLoaded } = useRecentlyViewed();
+
+  if (!isLoaded) {
+    return null;
+  }
 
   if (recentlyViewed.length === 0) {
-    return null;
+    if (!showEmptyState) return null;
+
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4 text-center">
+        <div className="flex items-center justify-center gap-2 text-indigo-600 dark:text-indigo-400">
+          <History className="w-6 h-6" />
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+            {title}
+          </h2>
+        </div>
+        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+          You haven't viewed any products yet. As you browse the catalog or open product details, your last 5 viewed products will automatically be tracked here.
+        </p>
+        <div className="pt-2">
+          <Link
+            href="/products"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span>Browse Products</span>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -71,3 +100,4 @@ export default function RecentlyViewedSection({
     </div>
   );
 }
+

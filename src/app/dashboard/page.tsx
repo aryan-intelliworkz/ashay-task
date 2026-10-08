@@ -81,8 +81,16 @@ export default function DashboardPage() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await Promise.all([refreshProfile(), getDashboardMetrics().then(setStats)]);
-    setTimeout(() => setIsRefreshing(false), 800);
+    try {
+      await Promise.allSettled([
+        refreshProfile(),
+        getDashboardMetrics().then(setStats),
+      ]);
+    } catch (e) {
+      console.warn("Refresh error:", e);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 800);
+    }
   };
 
   const handleCopyToken = () => {
@@ -278,6 +286,7 @@ export default function DashboardPage() {
           title="Recently Viewed (Last 5 Opened Products)"
           subtitle="Products you recently inspected in details or quick view"
           onQuickView={(p) => setSelectedProduct(p)}
+          showEmptyState={true}
         />
 
         {/* 2. RECENT ORDER HISTORY & 1-CLICK RE-ORDER ON DASHBOARD */}

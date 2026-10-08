@@ -24,6 +24,8 @@ import {
   Share2,
   Heart,
   Scale,
+  Plus,
+  Minus,
 } from "lucide-react";
 
 export default function ProductDetailView({ product }: { product: Product }) {
@@ -289,22 +291,28 @@ export default async function ProductPage({
             {/* Purchase CTA controls */}
             <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                {/* Quantity */}
+                {/* Quantity increment and decrement buttons */}
                 <div className="flex items-center justify-between sm:justify-start border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800 p-1">
                   <button
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="w-10 h-10 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-base font-bold"
+                    disabled={quantity <= 1}
+                    className="w-10 h-10 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Decrement quantity"
+                    aria-label="Decrement quantity"
                   >
-                    -
+                    <Minus className="w-4 h-4" />
                   </button>
                   <span className="w-12 text-center text-sm font-bold text-slate-900 dark:text-white">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                    className="w-10 h-10 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-base font-bold"
+                    disabled={quantity >= product.stock}
+                    className="w-10 h-10 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Increment quantity"
+                    aria-label="Increment quantity"
                   >
-                    +
+                    <Plus className="w-4 h-4" />
                   </button>
                 </div>
 

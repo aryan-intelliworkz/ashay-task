@@ -18,6 +18,8 @@ import {
   Heart,
   Scale,
   Share2,
+  Plus,
+  Minus,
 } from "lucide-react";
 import ShareModal from "@/components/products/ShareModal";
 
@@ -209,22 +211,28 @@ export default function QuickViewModal({ product, isOpen, onClose }: QuickViewMo
             {/* Action Row */}
             <div className="pt-6 space-y-3">
               <div className="flex items-center gap-3">
-                {/* Quantity Selector */}
+                {/* Quantity Selector with increment and decrement buttons */}
                 <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800">
                   <button
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-bold"
+                    disabled={quantity <= 1}
+                    className="p-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Decrement quantity"
+                    aria-label="Decrement quantity"
                   >
-                    -
+                    <Minus className="w-3.5 h-3.5" />
                   </button>
-                  <span className="px-3 text-xs font-semibold text-slate-900 dark:text-white">
+                  <span className="px-3 text-xs font-bold text-slate-900 dark:text-white min-w-[20px] text-center">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                    className="px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-bold"
+                    disabled={quantity >= product.stock}
+                    className="p-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Increment quantity"
+                    aria-label="Increment quantity"
                   >
-                    +
+                    <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
 

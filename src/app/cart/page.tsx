@@ -260,16 +260,21 @@ export default function CartPage() {
                     <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800">
                       <button
                         onClick={() => updateQuantity(product.id, quantity - 1)}
-                        className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                        className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                        title="Decrement quantity"
+                        aria-label="Decrement quantity"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
-                      <span className="px-3 text-xs font-bold text-slate-900 dark:text-white">
+                      <span className="px-3 text-xs font-bold text-slate-900 dark:text-white min-w-[20px] text-center">
                         {quantity}
                       </span>
                       <button
                         onClick={() => updateQuantity(product.id, quantity + 1)}
-                        className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                        disabled={quantity >= product.stock}
+                        className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Increment quantity"
+                        aria-label="Increment quantity"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>

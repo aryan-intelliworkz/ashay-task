@@ -90,10 +90,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!token) return;
     try {
       const updatedUser = await getCurrentUserProfile(token);
-      setUser(updatedUser);
-      localStorage.setItem("auth_user", JSON.stringify(updatedUser));
+      if (updatedUser) {
+        setUser((prev) => (prev ? { ...prev, ...updatedUser } : updatedUser));
+        localStorage.setItem("auth_user", JSON.stringify(updatedUser));
+      }
     } catch (error) {
-      console.error("Failed to refresh profile", error);
+      console.warn("Failed to refresh profile", error);
     }
   };
 
