@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Product } from "@/types";
 import { getProductById } from "@/lib/api";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/redux/hooks";
 import ProductCard from "@/components/products/ProductCard";
 import QuickViewModal from "@/components/products/QuickViewModal";
 import ShareModal from "@/components/products/ShareModal";

@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useCart } from "@/context/CartContext";
-import { useAuth } from "@/context/AuthContext";
-import { useOrders } from "@/context/OrdersContext";
+import { useCart, useAuth, useOrders } from "@/redux/hooks";
 import { Order, OrderShippingDetails } from "@/types";
 import {
   ShoppingBag,

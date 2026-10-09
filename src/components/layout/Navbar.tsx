@@ -3,10 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { useCart } from "@/context/CartContext";
-import { useWishlist } from "@/context/WishlistContext";
-import { useCompare } from "@/context/CompareContext";
+import { useAuth, useCart, useWishlist, useCompare } from "@/redux/hooks";
 import {
   ShoppingBag,
   ShoppingCart,

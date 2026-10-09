@@ -2,8 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useOrders } from "@/context/OrdersContext";
-import { useCart } from "@/context/CartContext";
+import { useOrders, useCart } from "@/redux/hooks";
 import {
   PackageCheck,
   ShoppingBag,

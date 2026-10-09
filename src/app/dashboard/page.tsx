@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
-import { useCart } from "@/context/CartContext";
-import { useWishlist } from "@/context/WishlistContext";
-import { useCompare } from "@/context/CompareContext";
-import { useOrders } from "@/context/OrdersContext";
-import { useRecentlyViewed } from "@/context/RecentlyViewedContext";
+import {
+  useAuth,
+  useCart,
+  useWishlist,
+  useCompare,
+  useOrders,
+  useRecentlyViewed,
+} from "@/redux/hooks";
 import { getDashboardMetrics, DashboardStats } from "@/lib/api";
 import ProductCard from "@/components/products/ProductCard";
 import QuickViewModal from "@/components/products/QuickViewModal";

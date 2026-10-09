@@ -147,6 +147,8 @@ export async function loginUserApi(credentials: LoginCredentials): Promise<User>
   }
 }
 
+export const login = loginUserApi;
+
 // 5. Fetch full User Profile with Auth Token
 export async function getCurrentUserProfile(token: string): Promise<User | null> {
   try {

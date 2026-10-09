@@ -3,10 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Product } from "@/types";
-import { useCart } from "@/context/CartContext";
-import { useWishlist } from "@/context/WishlistContext";
-import { useCompare } from "@/context/CompareContext";
-import { useRecentlyViewed } from "@/context/RecentlyViewedContext";
+import {
+  useCart,
+  useWishlist,
+  useCompare,
+  useRecentlyViewed,
+} from "@/redux/hooks";
 import { Star, ShoppingCart, Eye, Check, Heart, Scale, Plus, Minus } from "lucide-react";
 
 interface ProductCardProps {

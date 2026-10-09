@@ -2,9 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useCompare } from "@/context/CompareContext";
-import { useCart } from "@/context/CartContext";
-import { useWishlist } from "@/context/WishlistContext";
+import { useCompare, useCart, useWishlist } from "@/redux/hooks";
 import ShareModal from "@/components/products/ShareModal";
 import { Product } from "@/types";
 import {

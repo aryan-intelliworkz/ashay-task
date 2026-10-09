@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/redux/hooks";
 import { CheckCircle2, X } from "lucide-react";
 
 export default function Toast() {

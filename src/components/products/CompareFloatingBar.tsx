@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useCompare } from "@/context/CompareContext";
+import { useCompare } from "@/redux/hooks";
 import { Scale, X, ArrowRight, Trash2 } from "lucide-react";
 
 export default function CompareFloatingBar() {

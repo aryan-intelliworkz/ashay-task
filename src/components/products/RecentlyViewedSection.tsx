@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRecentlyViewed } from "@/context/RecentlyViewedContext";
+import { useRecentlyViewed } from "@/redux/hooks";
 import ProductCard from "@/components/products/ProductCard";
 import { History, Trash2, ArrowRight, Eye, Sparkles } from "lucide-react";
 import { Product } from "@/types";
